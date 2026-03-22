@@ -1,6 +1,5 @@
 # Environment
 .env
-config.php
 
 # XAMPP related
 /tmp/
