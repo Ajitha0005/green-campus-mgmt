@@ -1,0 +1,17 @@
+# Environment
+.env
+config.php
+
+# XAMPP related
+/tmp/
+/mysql/
+/php/
+/apache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
