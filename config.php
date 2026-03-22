@@ -12,8 +12,13 @@ try {
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES   => false,
-        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false, // Required for TiDB Cloud Serverless
     ];
+
+    // Force SSL for TiDB Cloud on Render
+    if (getenv('RENDER')) {
+        $options[PDO::MYSQL_ATTR_SSL_CA] = '/etc/ssl/certs/ca-certificates.crt';
+        $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+    }
     $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (\PDOException $e) {
      die("Database Connection Failed: " . $e->getMessage());
