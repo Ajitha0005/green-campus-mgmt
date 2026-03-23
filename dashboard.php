@@ -23,6 +23,21 @@ $wasteDates = json_encode(array_column($wasteChartData, 'date'));
 $dryData = json_encode(array_column($wasteChartData, 'dry_waste'));
 $wetData = json_encode(array_column($wasteChartData, 'wet_waste'));
 
+function formatNumber($num, $unit = '') {
+    $num = (float)$num;
+    if ($num >= 1000000000) {
+        $val = round($num / 1000000000, 1) . 'B';
+    } elseif ($num >= 1000000) {
+        $val = round($num / 1000000, 1) . 'M';
+    } elseif ($num >= 1000) {
+        $val = round($num / 1000, 1) . 'K';
+    } else {
+        $val = number_format($num, ($num == (int)$num ? 0 : 1));
+    }
+    $val = str_replace('.0', '', (string)$val);
+    return $val . ($unit ? ' ' . $unit : '');
+}
+
 // Fetch Generic Chart Data (Monthly/Daily)
 try {
     // Check if 'date' column exists, otherwise fallback to 'month'
@@ -98,22 +113,22 @@ if (isAdmin()) {
     <div class="card">
         <span class="material-symbols-outlined card-icon">forest</span>
         <div class="card-title">Trees Planted</div>
-        <div class="card-value"><?php echo number_format($totalTrees); ?></div>
+        <div class="card-value"><?php echo formatNumber($totalTrees); ?></div>
     </div>
     <div class="card">
         <span class="material-symbols-outlined card-icon">bolt</span>
         <div class="card-title">Elec Usage (kWh)</div>
-        <div class="card-value"><?php echo number_format($totalElec) . " KWH"; ?></div>
+        <div class="card-value"><?php echo formatNumber($totalElec, 'KWH'); ?></div>
     </div>
     <div class="card">
         <span class="material-symbols-outlined card-icon">water_drop</span>
         <div class="card-title">Water Usage (L)</div>
-        <div class="card-value"><?php echo number_format($totalWater) . " L"; ?></div>
+        <div class="card-value"><?php echo formatNumber($totalWater, 'L'); ?></div>
     </div>
     <div class="card">
         <span class="material-symbols-outlined card-icon">delete_forever</span>
         <div class="card-title">Total Waste (kg)</div>
-        <div class="card-value"><?php echo number_format($totalDry + $totalWet, 1) . " KG"; ?></div>
+        <div class="card-value"><?php echo formatNumber($totalDry + $totalWet, 'KG'); ?></div>
     </div>
 </div>
 
