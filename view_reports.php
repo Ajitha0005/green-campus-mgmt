@@ -18,7 +18,10 @@ $plantData = $plantStmt->fetchAll();
 <div class="table-card" style="margin-bottom: 2rem;">
     <div class="table-header">
         <h3 style="color: var(--dark-green);">Energy Logs</h3>
-        <input type="text" class="search-bar" placeholder="Search energy..." onkeyup="filterTable(this, 'energyTable')">
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" class="search-bar" placeholder="Search energy..." onkeyup="filterTable(this, 'energyTable')">
+            <a href="export_csv.php?type=energy" class="btn-primary" style="padding: 0.6rem 1.2rem; width: auto; font-size: 0.85rem; text-decoration: none;">Download CSV</a>
+        </div>
     </div>
     <div class="table-responsive">
         <table id="energyTable">
@@ -34,7 +37,7 @@ $plantData = $plantStmt->fetchAll();
             <tbody>
                 <?php foreach($energyData as $row): ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($row['month']); ?></td>
+                    <td><?php echo htmlspecialchars($row['date'] ?? $row['month']); ?></td>
                     <td><?php echo htmlspecialchars($row['electricity_units']); ?></td>
                     <td><?php echo htmlspecialchars($row['water_usage']); ?></td>
                     <td><?php echo htmlspecialchars($row['added_by']); ?></td>
@@ -52,7 +55,10 @@ $plantData = $plantStmt->fetchAll();
 <div class="table-card" style="margin-bottom: 2rem;">
     <div class="table-header">
         <h3 style="color: var(--dark-green);">Waste Management</h3>
-        <input type="text" class="search-bar" placeholder="Search waste..." onkeyup="filterTable(this, 'wasteTable')">
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" class="search-bar" placeholder="Search waste..." onkeyup="filterTable(this, 'wasteTable')">
+            <a href="export_csv.php?type=waste" class="btn-primary" style="padding: 0.6rem 1.2rem; width: auto; font-size: 0.85rem; text-decoration: none;">Download CSV</a>
+        </div>
     </div>
     <div class="table-responsive">
         <table id="wasteTable">
@@ -84,7 +90,10 @@ $plantData = $plantStmt->fetchAll();
 <div class="table-card">
     <div class="table-header">
         <h3 style="color: var(--dark-green);">Plantation Records</h3>
-        <input type="text" class="search-bar" placeholder="Search plantations..." onkeyup="filterTable(this, 'plantTable')">
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" class="search-bar" placeholder="Search plantations..." onkeyup="filterTable(this, 'plantTable')">
+            <a href="export_csv.php?type=plantation" class="btn-primary" style="padding: 0.6rem 1.2rem; width: auto; font-size: 0.85rem; text-decoration: none;">Download CSV</a>
+        </div>
     </div>
     <div class="table-responsive">
         <table id="plantTable">

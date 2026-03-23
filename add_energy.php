@@ -6,13 +6,13 @@ $msg = '';
 $msgType = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $month = $_POST['month'];
+    $date = $_POST['date'];
     $electricity = intval($_POST['electricity']);
     $water = intval($_POST['water']);
     $user_id = $_SESSION['user_id'];
 
-    $stmt = $pdo->prepare("INSERT INTO energy_usage (month, electricity_units, water_usage, created_by) VALUES (?, ?, ?, ?)");
-    if ($stmt->execute([$month, $electricity, $water, $user_id])) {
+    $stmt = $pdo->prepare("INSERT INTO energy_usage (date, electricity_units, water_usage, created_by) VALUES (?, ?, ?, ?)");
+    if ($stmt->execute([$date, $electricity, $water, $user_id])) {
         $msg = "Energy record added successfully!";
         $msgType = "success";
     } else {
@@ -35,14 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     <form method="POST" action="">
         <div class="form-group">
-            <label>Month</label>
-            <select name="month" class="form-control" required>
-                <option value="">Select Month</option>
-                <?php
-                $months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                foreach ($months as $m) echo "<option value=\"$m\">$m</option>";
-                ?>
-            </select>
+            <label>Date</label>
+            <input type="date" name="date" class="form-control" required>
         </div>
         <div class="form-group">
             <label>Electricity Units (kWh)</label>
@@ -64,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <table>
             <thead>
                 <tr>
-                    <th>Month</th>
+                    <th>Date</th>
                     <th>Electricity Units</th>
                     <th>Water Usage</th>
                     <th>Added On</th>
@@ -76,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 while($row = $stmt->fetch()):
                 ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($row['month']); ?></td>
+                    <td><?php echo htmlspecialchars($row['date']); ?></td>
                     <td><?php echo htmlspecialchars($row['electricity_units']); ?></td>
                     <td><?php echo htmlspecialchars($row['water_usage']); ?></td>
                     <td><?php echo date('d M Y', strtotime($row['created_at'])); ?></td>

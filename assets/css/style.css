@@ -51,7 +51,7 @@ a { text-decoration: none; color: inherit; }
 .top-header { height: var(--header-height); background: transparent; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; border-bottom: 1px solid var(--border-color); z-index: 5; backdrop-filter: blur(10px); }
 .menu-toggle { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-main); }
 .user-info { display: flex; align-items: center; gap: 1.5rem; }
-.welcome-text { font-size: 1.8rem; color: var(--dark-green); font-weight: 800; letter-spacing: -1px; text-transform: lowercase; line-height: 1; }
+.welcome-text { font-size: 1.8rem; color: var(--dark-green); font-weight: 800; letter-spacing: -1px; line-height: 1; }
 .user-name { font-size: 1.2rem; color: var(--primary-green); font-weight: 600; letter-spacing: 0; display: inline-block; vertical-align: middle; margin-left: 5px; text-transform: capitalize; }
 .logout-btn { background: rgba(231, 76, 60, 0.15); color: #ff7675; padding: 0.6rem 1.2rem; border-radius: var(--radius-btn); transition: var(--transition); border: 1px solid rgba(231, 76, 60, 0.2); font-weight: 600; cursor: pointer; }
 .logout-btn:hover { background: #e74c3c; color: white; box-shadow: 0 4px 15px rgba(231,76,60,0.3); }

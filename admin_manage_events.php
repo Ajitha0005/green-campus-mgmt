@@ -22,18 +22,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $desc = trim($_POST['description']);
     $date = $_POST['event_date'];
     $loc = trim($_POST['location']);
+    $form_url = trim($_POST['google_form_url']);
 
     if (isset($_POST['event_id']) && !empty($_POST['event_id'])) {
         // Update
-        $stmt = $pdo->prepare("UPDATE events SET title=?, description=?, event_date=?, location=? WHERE id=?");
-        if ($stmt->execute([$title, $desc, $date, $loc, intval($_POST['event_id'])])) {
+        $stmt = $pdo->prepare("UPDATE events SET title=?, description=?, event_date=?, location=?, google_form_url=? WHERE id=?");
+        if ($stmt->execute([$title, $desc, $date, $loc, $form_url, intval($_POST['event_id'])])) {
             $msg = "Event updated!";
             $msgType = "success";
         }
     } else {
         // Add
-        $stmt = $pdo->prepare("INSERT INTO events (title, description, event_date, location) VALUES (?, ?, ?, ?)");
-        if ($stmt->execute([$title, $desc, $date, $loc])) {
+        $stmt = $pdo->prepare("INSERT INTO events (title, description, event_date, location, google_form_url) VALUES (?, ?, ?, ?, ?)");
+        if ($stmt->execute([$title, $desc, $date, $loc, $form_url])) {
             $msg = "Event added!";
             $msgType = "success";
         }
@@ -70,6 +71,10 @@ $events = $pdo->query("SELECT * FROM events ORDER BY event_date DESC")->fetchAll
             <div class="form-group">
                 <label>Location</label>
                 <input type="text" name="location" id="location" class="form-control" required placeholder="e.g. Main Lobby">
+            </div>
+            <div class="form-group">
+                <label>Google Form URL (for Registration)</label>
+                <input type="url" name="google_form_url" id="google_form_url" class="form-control" placeholder="https://forms.gle/...">
             </div>
             <button type="submit" class="btn-primary">Save Event</button>
             <button type="button" onclick="resetForm()" class="btn-danger" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); width: 100%; margin-top: 0.5rem;">Reset</button>
@@ -115,6 +120,7 @@ function editEvent(event) {
     document.getElementById('description').value = event.description;
     document.getElementById('event_date').value = event.event_date;
     document.getElementById('location').value = event.location;
+    document.getElementById('google_form_url').value = event.google_form_url || '';
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -125,6 +131,7 @@ function resetForm() {
     document.getElementById('description').value = '';
     document.getElementById('event_date').value = '';
     document.getElementById('location').value = '';
+    document.getElementById('google_form_url').value = '';
 }
 </script>
 

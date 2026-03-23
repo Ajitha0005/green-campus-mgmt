@@ -14,7 +14,7 @@ INSERT IGNORE INTO users (name, email, password, role) VALUES
 
 CREATE TABLE IF NOT EXISTS energy_usage (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    month VARCHAR(20),
+    date DATE,
     electricity_units INT,
     water_usage INT,
     created_by INT,
@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS events (
     description TEXT,
     event_date DATE,
     location VARCHAR(100),
+    google_form_url VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

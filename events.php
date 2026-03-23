@@ -86,7 +86,9 @@ if (isLoggedIn()) {
                 <?php echo htmlspecialchars($event['location']); ?>
             </div>
 
-            <?php if (in_array($event['id'], $my_regs)): ?>
+            <?php if (!empty($event['google_form_url'])): ?>
+                <a href="<?php echo htmlspecialchars($event['google_form_url']); ?>" target="_blank" class="btn-primary" style="text-decoration: none;">Register Now</a>
+            <?php elseif (in_array($event['id'], $my_regs)): ?>
                 <button class="btn-primary" disabled style="background: var(--light-green); color: var(--primary-green); cursor: default;">
                     Already Registered
                 </button>

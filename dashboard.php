@@ -16,7 +16,21 @@ $energy = $energyStmt->fetch();
 $totalElec = $energy['total_elec'] ?? 0;
 $totalWater = $energy['total_water'] ?? 0;
 
-// Fetch Chart Data (Last 6 entries)
+// Fetch Waste Chart Data (Last 6 entries)
+$wasteChartStmt = $pdo->query("SELECT date, dry_waste, wet_waste FROM waste ORDER BY date DESC LIMIT 6");
+$wasteChartData = array_reverse($wasteChartStmt->fetchAll());
+$wasteDates = json_encode(array_column($wasteChartData, 'date'));
+$dryData = json_encode(array_column($wasteChartData, 'dry_waste'));
+$wetData = json_encode(array_column($wasteChartData, 'wet_waste'));
+
+function formatNumber($num) {
+    if ($num >= 1000000) return round($num / 1000000, 1) . 'M';
+    if ($num >= 100000) return round($num / 100000, 1) . 'L'; // 1 Lakh = 100k
+    if ($num >= 1000) return round($num / 1000, 1) . 'K';
+    return is_numeric($num) ? number_format($num, ($num == (int)$num ? 0 : 1)) : $num;
+}
+
+// Fetch Generic Chart Data (Monthly)
 $chartStmt = $pdo->query("SELECT month, electricity_units, water_usage FROM energy_usage ORDER BY id DESC LIMIT 6");
 $chartData = array_reverse($chartStmt->fetchAll());
 $months = json_encode(array_column($chartData, 'month'));
@@ -28,10 +42,10 @@ $alerts = [];
 $latestEnergy = end($chartData);
 if ($latestEnergy) {
     if ($latestEnergy['electricity_units'] > 500) {
-        $alerts[] = ["type" => "danger", "msg" => "High Electricity Usage: " . $latestEnergy['electricity_units'] . " units in " . $latestEnergy['month'] . ". Consider checking heavy equipment."];
+        $alerts[] = ["type" => "danger", "msg" => "High Electricity Usage: " . $latestEnergy['electricity_units'] . " units. Consider checking heavy equipment."];
     }
     if ($latestEnergy['water_usage'] > 2000) {
-        $alerts[] = ["type" => "warning", "msg" => "Water Usage Alert: " . $latestEnergy['water_usage'] . " Liters in " . $latestEnergy['month'] . ". Potential leak detected."];
+        $alerts[] = ["type" => "warning", "msg" => "Water Usage Alert: " . $latestEnergy['water_usage'] . " Liters. Potential leak detected."];
     }
 }
 ?>
@@ -55,22 +69,22 @@ if ($latestEnergy) {
     <div class="card">
         <span class="material-symbols-outlined card-icon">forest</span>
         <div class="card-title">Trees Planted</div>
-        <div class="card-value"><?php echo number_format($totalTrees); ?></div>
+        <div class="card-value"><?php echo formatNumber($totalTrees); ?></div>
     </div>
     <div class="card">
         <span class="material-symbols-outlined card-icon">bolt</span>
         <div class="card-title">Elec Usage (kWh)</div>
-        <div class="card-value"><?php echo number_format($totalElec); ?></div>
+        <div class="card-value"><?php echo formatNumber($totalElec); ?></div>
     </div>
     <div class="card">
         <span class="material-symbols-outlined card-icon">water_drop</span>
         <div class="card-title">Water Usage (L)</div>
-        <div class="card-value"><?php echo number_format($totalWater); ?></div>
+        <div class="card-value"><?php echo formatNumber($totalWater); ?></div>
     </div>
     <div class="card">
         <span class="material-symbols-outlined card-icon">delete_forever</span>
         <div class="card-title">Total Waste (kg)</div>
-        <div class="card-value"><?php echo number_format($totalDry + $totalWet, 1); ?></div>
+        <div class="card-value"><?php echo formatNumber($totalDry + $totalWet); ?></div>
     </div>
 </div>
 
@@ -88,33 +102,13 @@ if ($latestEnergy) {
 </div>
 
 <div class="grid-cards" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));">
-    <!-- Recent Energy -->
+    <!-- Waste Management Graph -->
     <div class="table-card" style="margin-top: 0;">
         <div class="table-header">
-            <h3>Recent Energy Logs</h3>
+            <h3>Waste Analysis (Dry vs Wet)</h3>
         </div>
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Month</th>
-                        <th>Elec (kWh)</th>
-                        <th>Water (L)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $stmt = $pdo->query("SELECT month, electricity_units, water_usage FROM energy_usage ORDER BY id DESC LIMIT 5");
-                    while($row = $stmt->fetch()):
-                    ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($row['month']); ?></td>
-                        <td><?php echo htmlspecialchars($row['electricity_units']); ?></td>
-                        <td><?php echo htmlspecialchars($row['water_usage']); ?></td>
-                    </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
+        <div style="height: 300px; margin-top: 1rem;">
+            <canvas id="wasteChart"></canvas>
         </div>
     </div>
 
@@ -146,6 +140,22 @@ if ($latestEnergy) {
                 </tbody>
             </table>
         </div>
+    </div>
+</div>
+
+<!-- Feedback Section -->
+<div class="grid-cards" style="grid-template-columns: 1fr;">
+    <div class="form-card" style="max-width: 100%; margin-top: 0;">
+        <div class="table-header">
+            <h3>Share Your Suggestions</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Help us make our campus greener and smarter</p>
+        </div>
+        <form action="feedback_handler.php" method="POST" style="margin-top: 1.5rem;">
+            <div class="form-group">
+                <textarea name="message" class="form-control" placeholder="Your feedback or suggestions..." required style="height: 100px; padding: 1rem; border-radius: 15px;"></textarea>
+            </div>
+            <button type="submit" class="btn-primary" style="width: auto; padding: 0.8rem 2.5rem;">Send Feedback</button>
+        </form>
     </div>
 </div>
 
@@ -202,6 +212,39 @@ const myChart = new Chart(ctx, {
                 grid: { display: false },
                 ticks: { color: '#64748b', font: { family: 'Outfit', size: 12 } }
             }
+        }
+    }
+});
+
+// Waste Chart
+const ctxWaste = document.getElementById('wasteChart').getContext('2d');
+new Chart(ctxWaste, {
+    type: 'line',
+    data: {
+        labels: <?php echo $wasteDates; ?>,
+        datasets: [{
+            label: 'Dry Waste (kg)',
+            data: <?php echo $dryData; ?>,
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            fill: true,
+            tension: 0.4
+        }, {
+            label: 'Wet Waste (kg)',
+            data: <?php echo $wetData; ?>,
+            borderColor: '#064e3b',
+            backgroundColor: 'rgba(6, 78, 59, 0.1)',
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'top', labels: { usePointStyle: true, font: { family: 'Outfit' } } } },
+        scales: { 
+            y: { beginAtZero: true, grid: { display: false } },
+            x: { grid: { display: false } }
         }
     }
 });

@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <form method="POST" action="">
                 <div class="form-group">
-                    <label for="display_name">Your Name (for Welcome)</label>
+                    <label for="display_name">Your Name</label>
                     <div class="input-wrapper">
                         <span class="material-symbols-outlined input-icon">person</span>
                         <input type="text" id="display_name" name="display_name" class="form-control" placeholder="Optional: Enter your name">

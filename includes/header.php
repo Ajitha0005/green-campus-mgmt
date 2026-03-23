@@ -64,7 +64,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 <span class="material-symbols-outlined">menu</span>
             </button>
             <div class="user-info">
-                <span class="welcome-text">welcome, <span class="user-name"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?></span></span>
+                <span class="welcome-text">Welcome, <span class="user-name"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?></span></span>
             </div>
         </header>
 
