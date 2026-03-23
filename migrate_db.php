@@ -12,7 +12,8 @@ try {
         $pdo->exec("ALTER TABLE energy_usage CHANGE COLUMN month date DATE");
     }
     
-    echo "Migration successful!";
+    echo "Migration successful! Redirecting...";
+    header("Refresh: 2; URL=dashboard.php");
 } catch (Exception $e) {
     echo "Migration failed: " . $e->getMessage();
 }

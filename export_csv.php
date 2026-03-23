@@ -15,10 +15,12 @@ header('Content-Disposition: attachment; filename="' . $filename . '"');
 $output = fopen('php://output', 'w');
 
 if ($type == 'energy') {
-    fputcsv($output, ['Date', 'Electricity (kWh)', 'Water (L)', 'Added By', 'Date Logged']);
+    $colCheck = $pdo->query("SHOW COLUMNS FROM energy_usage LIKE 'date'");
+    $colName = $colCheck->fetch() ? 'date' : 'month';
+    fputcsv($output, [$colName == 'date' ? 'Date' : 'Month', 'Electricity (kWh)', 'Water (L)', 'Added By', 'Date Logged']);
     $stmt = $pdo->query("SELECT e.*, u.name as added_by FROM energy_usage e JOIN users u ON e.created_by = u.id ORDER BY created_at DESC");
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        fputcsv($output, [$row['date'], $row['electricity_units'], $row['water_usage'], $row['added_by'], $row['created_at']]);
+        fputcsv($output, [$row[$colName], $row['electricity_units'], $row['water_usage'], $row['added_by'], $row['created_at']]);
     }
 } elseif ($type == 'waste') {
     fputcsv($output, ['Date', 'Dry Waste (kg)', 'Wet Waste (kg)', 'Added By']);

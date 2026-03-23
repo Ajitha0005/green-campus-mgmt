@@ -37,7 +37,7 @@ $plantData = $plantStmt->fetchAll();
             <tbody>
                 <?php foreach($energyData as $row): ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($row['date'] ?? $row['month']); ?></td>
+                    <td><?php echo htmlspecialchars($row['date'] ?? $row['month'] ?? 'N/A'); ?></td>
                     <td><?php echo htmlspecialchars($row['electricity_units']); ?></td>
                     <td><?php echo htmlspecialchars($row['water_usage']); ?></td>
                     <td><?php echo htmlspecialchars($row['added_by']); ?></td>

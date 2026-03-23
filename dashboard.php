@@ -23,12 +23,21 @@ $wasteDates = json_encode(array_column($wasteChartData, 'date'));
 $dryData = json_encode(array_column($wasteChartData, 'dry_waste'));
 $wetData = json_encode(array_column($wasteChartData, 'wet_waste'));
 
-// Fetch Generic Chart Data (Monthly)
-$chartStmt = $pdo->query("SELECT date as month, electricity_units, water_usage FROM energy_usage ORDER BY id DESC LIMIT 6");
-$chartData = array_reverse($chartStmt->fetchAll());
-$months = json_encode(array_column($chartData, 'month'));
-$elecData = json_encode(array_column($chartData, 'electricity_units'));
-$waterData = json_encode(array_column($chartData, 'water_usage'));
+// Fetch Generic Chart Data (Monthly/Daily)
+try {
+    // Check if 'date' column exists, otherwise fallback to 'month'
+    $colCheck = $pdo->query("SHOW COLUMNS FROM energy_usage LIKE 'date'");
+    $dateCol = $colCheck->fetch() ? 'date' : 'month';
+    $chartStmt = $pdo->query("SELECT $dateCol as label, electricity_units, water_usage FROM energy_usage ORDER BY id DESC LIMIT 6");
+    $chartData = array_reverse($chartStmt->fetchAll());
+    $months = json_encode(array_column($chartData, 'label'));
+    $elecData = json_encode(array_column($chartData, 'electricity_units'));
+    $waterData = json_encode(array_column($chartData, 'water_usage'));
+} catch (Exception $e) {
+    $months = json_encode([]);
+    $elecData = json_encode([]);
+    $waterData = json_encode([]);
+}
 
 // Fetch Recent Feedback
 $feedbackListStmt = $pdo->query("SELECT f.*, u.name as user_name FROM feedback f JOIN users u ON f.user_id = u.id ORDER BY f.created_at DESC LIMIT 5");
@@ -45,9 +54,32 @@ if ($latestEnergy) {
         $alerts[] = ["type" => "warning", "msg" => "Water Usage Alert: " . $latestEnergy['water_usage'] . " Liters. Potential leak detected."];
     }
 }
+
+// Check if migration is needed (Admin Only)
+$migrationNeeded = false;
+if (isAdmin()) {
+    $checkEvents = $pdo->query("SHOW COLUMNS FROM events LIKE 'google_form_url'");
+    $checkEnergy = $pdo->query("SHOW COLUMNS FROM energy_usage LIKE 'date'");
+    if (!$checkEvents->fetch() || !$checkEnergy->fetch()) {
+        $migrationNeeded = true;
+    }
+}
 ?>
 
 <div class="page-title">Dashboard Overview</div>
+
+<!-- Migration Required Alert (Admin Only) -->
+<?php if ($migrationNeeded): ?>
+<div class="alert alert-warning" style="margin-bottom: 2rem; border-left: 5px solid #f59e0b; background: rgba(245, 158, 11, 0.1);">
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div>
+            <strong style="color: #92400e;">Database Update Required!</strong>
+            <p style="margin: 0.2rem 0 0; font-size: 0.85rem; color: #b45309;">Some new features require a database schema update. Click the button to sync.</p>
+        </div>
+        <a href="migrate_db.php" class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem; font-size: 0.85rem; background: #f59e0b; text-decoration: none;">Run Migration Now</a>
+    </div>
+</div>
+<?php endif; ?>
 
 <!-- Alerts Section -->
 <?php if (!empty($alerts)): ?>

@@ -11,7 +11,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $water = intval($_POST['water']);
     $user_id = $_SESSION['user_id'];
 
-    $stmt = $pdo->prepare("INSERT INTO energy_usage (date, electricity_units, water_usage, created_by) VALUES (?, ?, ?, ?)");
+    // Defensive Check for 'date' vs 'month'
+    $colCheck = $pdo->query("SHOW COLUMNS FROM energy_usage LIKE 'date'");
+    $colName = $colCheck->fetch() ? 'date' : 'month';
+
+    $stmt = $pdo->prepare("INSERT INTO energy_usage ($colName, electricity_units, water_usage, created_by) VALUES (?, ?, ?, ?)");
     if ($stmt->execute([$date, $electricity, $water, $user_id])) {
         $msg = "Energy record added successfully!";
         $msgType = "success";
@@ -66,11 +70,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </thead>
             <tbody>
                 <?php
-                $stmt = $pdo->query("SELECT * FROM energy_usage ORDER BY created_at DESC LIMIT 20");
+                $colCheck = $pdo->query("SHOW COLUMNS FROM energy_usage LIKE 'date'");
+                $colName = $colCheck->fetch() ? 'date' : 'month';
+                $stmt = $pdo->query("SELECT * FROM energy_usage ORDER BY id DESC LIMIT 10");
                 while($row = $stmt->fetch()):
                 ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($row['date']); ?></td>
+                    <td><?php echo htmlspecialchars($row[$colName]); ?></td>
                     <td><?php echo htmlspecialchars($row['electricity_units']); ?></td>
                     <td><?php echo htmlspecialchars($row['water_usage']); ?></td>
                     <td><?php echo date('d M Y', strtotime($row['created_at'])); ?></td>
