@@ -1,6 +1,6 @@
 <?php
 require_once 'config.php';
-require_once 'includes/header.php';
+require_once 'includes/auth.php';
 
 $msg = '';
 $msgType = '';
@@ -48,6 +48,9 @@ if (isAdmin()) {
         }
     }
 }
+
+// Now include header which outputs HTML
+require_once 'includes/header.php';
 
 // Fetch events
 $stmt = $pdo->query("SELECT * FROM events ORDER BY event_date ASC");
