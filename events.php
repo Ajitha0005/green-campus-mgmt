@@ -5,6 +5,11 @@ require_once 'includes/header.php';
 $msg = '';
 $msgType = '';
 
+if (isset($_GET['deleted']) && $_GET['deleted'] == 1) {
+    $msg = "Notice deleted successfully.";
+    $msgType = "success";
+}
+
 // Handle actions if Staff (Admin)
 if (isAdmin()) {
     // Delete action
@@ -12,8 +17,8 @@ if (isAdmin()) {
         $id = intval($_GET['delete']);
         $stmt = $pdo->prepare("DELETE FROM events WHERE id = ?");
         if ($stmt->execute([$id])) {
-            $msg = "Notice deleted successfully.";
-            $msgType = "success";
+            header("Location: events.php?deleted=1");
+            exit;
         }
     }
 
@@ -117,7 +122,8 @@ function toggleNoticeForm() {
     container.style.display = container.style.display === 'none' ? 'block' : 'none';
 }
 
-function editNotice(notice) {
+function editNotice(btn) {
+    const notice = JSON.parse(btn.getAttribute('data-event'));
     document.getElementById('notice-form-container').style.display = 'block';
     document.getElementById('form-title').innerText = 'Edit Notice';
     document.getElementById('record_id').value = notice.id;
@@ -181,7 +187,7 @@ function cancelEdit() {
 
             <?php if (isAdmin()): ?>
             <div style="margin-top: 1rem; display: flex; gap: 0.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
-                <button onclick='editNotice(<?php echo json_encode($event); ?>)' class="btn-primary" style="padding: 6px 15px; width: auto; font-size: 0.85rem;">Edit</button>
+                <button onclick="editNotice(this)" data-event="<?php echo htmlspecialchars(json_encode($event), ENT_QUOTES, 'UTF-8'); ?>" class="btn-primary" style="padding: 6px 15px; width: auto; font-size: 0.85rem;">Edit</button>
                 <a href="?delete=<?php echo $event['id']; ?>" class="btn-danger" onclick="return confirm('Are you sure you want to delete this notice?')" style="padding: 6px 15px; font-size: 0.85rem; text-decoration: none; display: inline-block;">Delete</a>
             </div>
             <?php endif; ?>
