@@ -30,7 +30,7 @@ $events = $stmt->fetchAll();
     </div>
 </div>
 
-<div class="page-title" style="font-size: 1.4rem; color: #666; margin-top: 2rem;">Upcoming Green Events</div>
+<div class="page-title" style="font-size: 1.4rem; color: #666; margin-top: 2rem;">Notice Board</div>
 
 <?php if ($msg): ?>
     <div class="alert alert-<?php echo $msgType; ?>"><?php echo htmlspecialchars($msg); ?></div>
@@ -54,10 +54,7 @@ $events = $stmt->fetchAll();
                 <?php echo htmlspecialchars($event['location']); ?>
             </div>
 
-            <!-- Registration Button -->
-            <a href="<?php echo htmlspecialchars(!empty($event['google_form_url']) ? $event['google_form_url'] : 'mock_google_form.php'); ?>" target="_blank" class="btn-primary" style="text-decoration: none; text-align: center; display: inline-block; box-sizing: border-box; padding: 10px 20px;">
-                Register Now
-            </a>
+
         </div>
     <?php endforeach; ?>
 </div>
