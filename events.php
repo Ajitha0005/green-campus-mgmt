@@ -55,9 +55,9 @@ $events = $stmt->fetchAll();
             </div>
 
             <!-- Registration Button -->
-            <button onclick="window.open('<?php echo htmlspecialchars(!empty($event['google_form_url']) ? $event['google_form_url'] : 'https://docs.google.com/forms/'); ?>', '_blank')" class="btn-primary">
+            <a href="<?php echo htmlspecialchars(!empty($event['google_form_url']) ? $event['google_form_url'] : 'https://docs.google.com/forms/viewform'); ?>" target="_blank" class="btn-primary" style="text-decoration: none; text-align: center; display: inline-block; box-sizing: border-box; padding: 10px 20px;">
                 Register Now
-            </button>
+            </a>
         </div>
     <?php endforeach; ?>
 </div>
