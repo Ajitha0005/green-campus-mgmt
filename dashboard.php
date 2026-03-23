@@ -23,19 +23,16 @@ $wasteDates = json_encode(array_column($wasteChartData, 'date'));
 $dryData = json_encode(array_column($wasteChartData, 'dry_waste'));
 $wetData = json_encode(array_column($wasteChartData, 'wet_waste'));
 
-function formatNumber($num) {
-    if ($num >= 1000000) return round($num / 1000000, 1) . 'M';
-    if ($num >= 100000) return round($num / 100000, 1) . 'L'; // 1 Lakh = 100k
-    if ($num >= 1000) return round($num / 1000, 1) . 'K';
-    return is_numeric($num) ? number_format($num, ($num == (int)$num ? 0 : 1)) : $num;
-}
-
 // Fetch Generic Chart Data (Monthly)
-$chartStmt = $pdo->query("SELECT month, electricity_units, water_usage FROM energy_usage ORDER BY id DESC LIMIT 6");
+$chartStmt = $pdo->query("SELECT date as month, electricity_units, water_usage FROM energy_usage ORDER BY id DESC LIMIT 6");
 $chartData = array_reverse($chartStmt->fetchAll());
 $months = json_encode(array_column($chartData, 'month'));
 $elecData = json_encode(array_column($chartData, 'electricity_units'));
 $waterData = json_encode(array_column($chartData, 'water_usage'));
+
+// Fetch Recent Feedback
+$feedbackListStmt = $pdo->query("SELECT f.*, u.name as user_name FROM feedback f JOIN users u ON f.user_id = u.id ORDER BY f.created_at DESC LIMIT 5");
+$recentFeedbacks = $feedbackListStmt->fetchAll();
 
 // Usage Alerts Logic
 $alerts = [];
@@ -69,22 +66,22 @@ if ($latestEnergy) {
     <div class="card">
         <span class="material-symbols-outlined card-icon">forest</span>
         <div class="card-title">Trees Planted</div>
-        <div class="card-value"><?php echo formatNumber($totalTrees); ?></div>
+        <div class="card-value"><?php echo number_format($totalTrees); ?></div>
     </div>
     <div class="card">
         <span class="material-symbols-outlined card-icon">bolt</span>
         <div class="card-title">Elec Usage (kWh)</div>
-        <div class="card-value"><?php echo formatNumber($totalElec); ?></div>
+        <div class="card-value"><?php echo number_format($totalElec) . " KWH"; ?></div>
     </div>
     <div class="card">
         <span class="material-symbols-outlined card-icon">water_drop</span>
         <div class="card-title">Water Usage (L)</div>
-        <div class="card-value"><?php echo formatNumber($totalWater); ?></div>
+        <div class="card-value"><?php echo number_format($totalWater) . " L"; ?></div>
     </div>
     <div class="card">
         <span class="material-symbols-outlined card-icon">delete_forever</span>
         <div class="card-title">Total Waste (kg)</div>
-        <div class="card-value"><?php echo formatNumber($totalDry + $totalWet); ?></div>
+        <div class="card-value"><?php echo number_format($totalDry + $totalWet, 1) . " KG"; ?></div>
     </div>
 </div>
 
@@ -144,18 +141,35 @@ if ($latestEnergy) {
 </div>
 
 <!-- Feedback Section -->
-<div class="grid-cards" style="grid-template-columns: 1fr;">
-    <div class="form-card" style="max-width: 100%; margin-top: 0;">
+    <div class="table-card" style="margin-top: 0; padding: 2.5rem;">
         <div class="table-header">
             <h3>Share Your Suggestions</h3>
             <p style="color: var(--text-muted); font-size: 0.9rem;">Help us make our campus greener and smarter</p>
         </div>
         <form action="feedback_handler.php" method="POST" style="margin-top: 1.5rem;">
             <div class="form-group">
-                <textarea name="message" class="form-control" placeholder="Your feedback or suggestions..." required style="height: 100px; padding: 1rem; border-radius: 15px;"></textarea>
+                <textarea name="message" class="form-control" placeholder="Your feedback or suggestions..." required style="height: 120px; padding: 1.2rem; border-radius: 18px; font-size: 1.1rem; border: 1.5px solid var(--border-color);"></textarea>
             </div>
-            <button type="submit" class="btn-primary" style="width: auto; padding: 0.8rem 2.5rem;">Send Feedback</button>
+            <button type="submit" class="btn-primary" style="width: auto; padding: 1rem 3rem;">Send Feedback</button>
         </form>
+
+        <!-- Feedback Display -->
+        <div class="feedback-list" style="margin-top: 3rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+            <h4 style="margin-bottom: 1.5rem; color: var(--dark-green);">Recent Feedback</h4>
+            <?php if (empty($recentFeedbacks)): ?>
+                <p style="color: var(--text-muted);">No feedback yet. Be the first to share!</p>
+            <?php else: ?>
+                <?php foreach ($recentFeedbacks as $fb): ?>
+                    <div class="feedback-item" style="background: rgba(16, 185, 129, 0.03); padding: 1.5rem; border-radius: 15px; margin-bottom: 1rem; border: 1px dashed var(--primary-green);">
+                        <p style="color: var(--text-main); line-height: 1.6; font-size: 1.05rem;">"<?php echo htmlspecialchars($fb['message']); ?>"</p>
+                        <div style="margin-top: 0.8rem; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: 700; color: var(--primary-green); font-size: 0.9rem;">- <?php echo htmlspecialchars($fb['user_name']); ?></span>
+                            <span style="color: var(--text-muted); font-size: 0.8rem;"><?php echo date('d M Y, h:i A', strtotime($fb['created_at'])); ?></span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 
