@@ -45,10 +45,10 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <a href="admin_manage_users.php" class="nav-item <?php echo $currentPage == 'admin_manage_users.php' ? 'active' : ''; ?>">
                 <span class="material-symbols-outlined">group</span> Manage Users
             </a>
+            <?php endif; ?>
             <a href="feedback.php" class="nav-item <?php echo $currentPage == 'feedback.php' ? 'active' : ''; ?>">
                 <span class="material-symbols-outlined">chat_bubble</span> Feedback
             </a>
-            <?php endif; ?>
             
             <a href="logout.php" class="nav-item logout-nav">
                 <span class="material-symbols-outlined">logout</span> Logout

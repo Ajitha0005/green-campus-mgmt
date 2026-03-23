@@ -5,37 +5,40 @@ require_once 'includes/header.php';
 $msg = '';
 $msgType = '';
 
-// Handle Delete
-if (isset($_GET['delete'])) {
-    $id = intval($_GET['delete']);
-    $stmt = $pdo->prepare("DELETE FROM plantation WHERE id = ?");
-    if ($stmt->execute([$id])) {
-        $msg = "Record deleted successfully.";
-        $msgType = "success";
-    }
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $tree_name = trim($_POST['tree_name']);
-    $location = trim($_POST['location']);
-    $date_planted = $_POST['date_planted'];
-    $user_id = $_SESSION['user_id'];
-    $record_id = isset($_POST['record_id']) ? intval($_POST['record_id']) : 0;
-
-    if ($record_id > 0) {
-        $stmt = $pdo->prepare("UPDATE plantation SET tree_name=?, location=?, date_planted=? WHERE id=?");
-        if ($stmt->execute([$tree_name, $location, $date_planted, $record_id])) {
-            $msg = "Plantation record updated successfully!";
+// Handle actions if Staff (Admin)
+if (isAdmin()) {
+    // Handle Delete
+    if (isset($_GET['delete'])) {
+        $id = intval($_GET['delete']);
+        $stmt = $pdo->prepare("DELETE FROM plantation WHERE id = ?");
+        if ($stmt->execute([$id])) {
+            $msg = "Record deleted successfully.";
             $msgType = "success";
         }
-    } else {
-        $stmt = $pdo->prepare("INSERT INTO plantation (tree_name, location, date_planted, created_by) VALUES (?, ?, ?, ?)");
-        if ($stmt->execute([$tree_name, $location, $date_planted, $user_id])) {
-            $msg = "Plantation record added successfully!";
-            $msgType = "success";
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $tree_name = trim($_POST['tree_name']);
+        $location = trim($_POST['location']);
+        $date_planted = $_POST['date_planted'];
+        $user_id = $_SESSION['user_id'];
+        $record_id = isset($_POST['record_id']) ? intval($_POST['record_id']) : 0;
+
+        if ($record_id > 0) {
+            $stmt = $pdo->prepare("UPDATE plantation SET tree_name=?, location=?, date_planted=? WHERE id=?");
+            if ($stmt->execute([$tree_name, $location, $date_planted, $record_id])) {
+                $msg = "Plantation record updated successfully!";
+                $msgType = "success";
+            }
         } else {
-            $msg = "Failed to add record.";
-            $msgType = "error";
+            $stmt = $pdo->prepare("INSERT INTO plantation (tree_name, location, date_planted, created_by) VALUES (?, ?, ?, ?)");
+            if ($stmt->execute([$tree_name, $location, $date_planted, $user_id])) {
+                $msg = "Plantation record added successfully!";
+                $msgType = "success";
+            } else {
+                $msg = "Failed to add record.";
+                $msgType = "error";
+            }
         }
     }
 }
@@ -47,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="alert alert-<?php echo $msgType; ?>"><?php echo htmlspecialchars($msg); ?></div>
 <?php endif; ?>
 
+<?php if (isAdmin()): ?>
 <div class="form-card">
     <div class="form-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -72,6 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="button" id="cancel-btn" onclick="resetForm()" class="btn-danger" style="display: none; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); width: 100%; margin-top: 0.5rem;">Cancel Edit</button>
     </form>
 </div>
+<?php endif; ?>
 
 <div class="table-card">
     <div class="table-header">
@@ -84,7 +89,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <th>Tree Name</th>
                     <th>Location</th>
                     <th>Date Planted</th>
+                    <?php if (isAdmin()): ?>
                     <th>Actions</th>
+                    <?php endif; ?>
                 </tr>
             </thead>
             <tbody>
@@ -96,10 +103,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <td><?php echo htmlspecialchars($row['tree_name']); ?></td>
                     <td><?php echo htmlspecialchars($row['location']); ?></td>
                     <td><?php echo htmlspecialchars($row['date_planted']); ?></td>
+                    <?php if (isAdmin()): ?>
                     <td>
                         <button onclick='editRecord(<?php echo json_encode($row); ?>)' class="btn-primary" style="padding: 5px 10px; width: auto; font-size: 0.8rem; margin-right: 5px;">Edit</button>
                         <a href="?delete=<?php echo $row['id']; ?>" class="btn-danger" onclick="return confirm('Are you sure you want to delete this record?')" style="padding: 5px 10px; font-size: 0.8rem; text-decoration: none; display: inline-block;">Delete</a>
                     </td>
+                    <?php endif; ?>
                 </tr>
                 <?php endwhile; ?>
             </tbody>
@@ -107,6 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
+<?php if (isAdmin()): ?>
 <script>
 function editRecord(record) {
     document.getElementById('form-title').innerText = 'Edit Plantation Record';
@@ -129,5 +139,6 @@ function resetForm() {
     document.getElementById('cancel-btn').style.display = 'none';
 }
 </script>
+<?php endif; ?>
 
 <?php require_once 'includes/footer.php'; ?>
