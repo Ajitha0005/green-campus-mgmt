@@ -55,7 +55,7 @@ $events = $stmt->fetchAll();
             </div>
 
             <!-- Registration Button -->
-            <a href="<?php echo htmlspecialchars(!empty($event['google_form_url']) ? $event['google_form_url'] : "javascript:alert('Please configure your specific Google Form link for this event in the Admin Dashboard.');"); ?>" target="_blank" class="btn-primary" style="text-decoration: none; text-align: center; display: inline-block; box-sizing: border-box; padding: 10px 20px;">
+            <a href="<?php echo htmlspecialchars(!empty($event['google_form_url']) ? $event['google_form_url'] : 'mock_google_form.php'); ?>" target="_blank" class="btn-primary" style="text-decoration: none; text-align: center; display: inline-block; box-sizing: border-box; padding: 10px 20px;">
                 Register Now
             </a>
         </div>
