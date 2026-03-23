@@ -5,41 +5,9 @@ require_once 'includes/header.php';
 $msg = '';
 $msgType = '';
 
-// Handle Registration
-if (isset($_POST['register_event'])) {
-    $event_id = intval($_POST['event_id']);
-    $user_id = $_SESSION['user_id'];
-
-    // Check if already registered
-    $check = $pdo->prepare("SELECT id FROM event_registrations WHERE user_id = ? AND event_id = ?");
-    $check->execute([$user_id, $event_id]);
-    
-    if ($check->fetch()) {
-        $msg = "You are already registered for this event.";
-        $msgType = "error";
-    } else {
-        $stmt = $pdo->prepare("INSERT INTO event_registrations (user_id, event_id) VALUES (?, ?)");
-        if ($stmt->execute([$user_id, $event_id])) {
-            $msg = "Successfully registered for the event!";
-            $msgType = "success";
-        } else {
-            $msg = "Registration failed. Please try again.";
-            $msgType = "error";
-        }
-    }
-}
-
 // Fetch events
 $stmt = $pdo->query("SELECT * FROM events ORDER BY event_date ASC");
 $events = $stmt->fetchAll();
-
-// Fetch my registrations
-$my_regs = [];
-if (isLoggedIn()) {
-    $regStmt = $pdo->prepare("SELECT event_id FROM event_registrations WHERE user_id = ?");
-    $regStmt->execute([$_SESSION['user_id']]);
-    $my_regs = $regStmt->fetchAll(PDO::FETCH_COLUMN);
-}
 ?>
 
 <div class="page-title">Environmental awareness & Events</div>
@@ -86,18 +54,10 @@ if (isLoggedIn()) {
                 <?php echo htmlspecialchars($event['location']); ?>
             </div>
 
-            <?php if (!empty($event['google_form_url'])): ?>
-                <a href="<?php echo htmlspecialchars($event['google_form_url']); ?>" target="_blank" class="btn-primary" style="text-decoration: none;">Register Now</a>
-            <?php elseif (in_array($event['id'], $my_regs)): ?>
-                <button class="btn-primary" disabled style="background: var(--light-green); color: var(--primary-green); cursor: default;">
-                    Already Registered
-                </button>
-            <?php else: ?>
-                <form method="POST" action="">
-                    <input type="hidden" name="event_id" value="<?php echo $event['id']; ?>">
-                    <button type="submit" name="register_event" class="btn-primary">Register Now</button>
-                </form>
-            <?php endif; ?>
+            <!-- Registration Button -->
+            <button onclick="window.open('<?php echo htmlspecialchars($event['google_form_url'] ?? 'https://docs.google.com/forms/viewform'); ?>', '_blank')" class="btn-primary">
+                Register Now
+            </button>
         </div>
     <?php endforeach; ?>
 </div>
