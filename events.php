@@ -55,7 +55,7 @@ $events = $stmt->fetchAll();
             </div>
 
             <!-- Registration Button -->
-            <button onclick="window.open('<PASTE YOUR GOOGLE FORM LINK HERE>', '_blank')" class="btn-primary">
+            <button onclick="window.open('<?php echo htmlspecialchars(!empty($event['google_form_url']) ? $event['google_form_url'] : 'https://docs.google.com/forms/'); ?>', '_blank')" class="btn-primary">
                 Register Now
             </button>
         </div>
