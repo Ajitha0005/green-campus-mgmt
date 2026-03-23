@@ -46,12 +46,29 @@ $events = $stmt->fetchAll();
                 </span>
             </div>
             <h3 style="margin-bottom: 0.5rem; color: var(--white);"><?php echo htmlspecialchars($event['title']); ?></h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.6;">
-                <?php echo htmlspecialchars($event['description']); ?>
-            </p>
+            
+            <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(16, 185, 129, 0.05); border-left: 3px solid var(--primary-green); border-radius: 6px;">
+                <div style="display: flex; align-items: center; gap: 8px; color: var(--primary-green); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">
+                    <span class="material-symbols-outlined" style="font-size: 1.1rem;">schedule</span>
+                    Timing: 10:00 AM - 01:00 PM
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; color: var(--primary-green); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">
+                    <span class="material-symbols-outlined" style="font-size: 1.1rem;">location_on</span>
+                    Location: <?php echo htmlspecialchars($event['location']); ?>
+                </div>
+                <p style="color: var(--text-main); font-size: 0.9rem; margin-top: 0.8rem; margin-bottom: 0; line-height: 1.5;">
+                    <strong>Work Details:</strong> <?php echo htmlspecialchars($event['description']); ?>
+                </p>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">
+                <span class="material-symbols-outlined" style="font-size: 1.1rem; color: #f59e0b;">volunteer_activism</span>
+                Participation is completely voluntary based on willingness.
+            </div>
+            
             <div style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">
-                <span class="material-symbols-outlined" style="font-size: 1.1rem;">location_on</span>
-                <?php echo htmlspecialchars($event['location']); ?>
+                <span class="material-symbols-outlined" style="font-size: 1.1rem; color: #f59e0b;">redeem</span>
+                Rewards will be provided for all participants!
             </div>
 
 
