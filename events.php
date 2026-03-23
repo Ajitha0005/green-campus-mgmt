@@ -15,10 +15,25 @@ if (isAdmin()) {
     // Delete action
     if (isset($_GET['delete'])) {
         $id = intval($_GET['delete']);
-        $stmt = $pdo->prepare("DELETE FROM events WHERE id = ?");
-        if ($stmt->execute([$id])) {
-            header("Location: events.php?deleted=1");
-            exit;
+        try {
+            // First, delete any lingering student registrations tied to this event to prevent FOREIGN KEY constraint failures!
+            $pdo->prepare("DELETE FROM event_registrations WHERE event_id = ?")->execute([$id]);
+        } catch (Exception $e) {
+            // Ignore if the table doesnt exist or fails
+        }
+        
+        try {
+            $stmt = $pdo->prepare("DELETE FROM events WHERE id = ?");
+            if ($stmt->execute([$id])) {
+                header("Location: events.php?deleted=1");
+                exit;
+            } else {
+                $msg = "Failed to permanently delete the notice.";
+                $msgType = "error";
+            }
+        } catch (Exception $e) {
+            $msg = "Database Error: " . $e->getMessage();
+            $msgType = "error";
         }
     }
 
@@ -30,21 +45,26 @@ if (isAdmin()) {
         $location = trim($_POST['location'] ?? 'Green Campus');
         $record_id = isset($_POST['record_id']) ? intval($_POST['record_id']) : 0;
 
-        if ($record_id > 0) {
-            $stmt = $pdo->prepare("UPDATE events SET title=?, description=?, event_date=?, location=? WHERE id=?");
-            if ($stmt->execute([$title, $description, $event_date, $location, $record_id])) {
-                $msg = "Notice updated successfully!";
-                $msgType = "success";
-            }
-        } else {
-            $stmt = $pdo->prepare("INSERT INTO events (title, description, event_date, location) VALUES (?, ?, ?, ?)");
-            if ($stmt->execute([$title, $description, $event_date, $location])) {
-                $msg = "Notice added successfully!";
-                $msgType = "success";
+        try {
+            if ($record_id > 0) {
+                $stmt = $pdo->prepare("UPDATE events SET title=?, description=?, event_date=?, location=? WHERE id=?");
+                if ($stmt->execute([$title, $description, $event_date, $location, $record_id])) {
+                    $msg = "Notice updated successfully!";
+                    $msgType = "success";
+                }
             } else {
-                $msg = "Failed to add notice.";
-                $msgType = "error";
+                $stmt = $pdo->prepare("INSERT INTO events (title, description, event_date, location) VALUES (?, ?, ?, ?)");
+                if ($stmt->execute([$title, $description, $event_date, $location])) {
+                    $msg = "Notice added successfully!";
+                    $msgType = "success";
+                } else {
+                    $msg = "Failed to add notice.";
+                    $msgType = "error";
+                }
             }
+        } catch (Exception $e) {
+            $msg = "Database Error: " . $e->getMessage();
+            $msgType = "error";
         }
     }
 }
@@ -126,14 +146,13 @@ function toggleNoticeForm() {
 }
 
 function editNotice(btn) {
-    const notice = JSON.parse(btn.getAttribute('data-event'));
     document.getElementById('notice-form-container').style.display = 'block';
     document.getElementById('form-title').innerText = 'Edit Notice';
-    document.getElementById('record_id').value = notice.id;
-    document.getElementById('title').value = notice.title;
-    document.getElementById('description').value = notice.description;
-    document.getElementById('event_date').value = notice.event_date;
-    document.getElementById('location').value = notice.location;
+    document.getElementById('record_id').value = btn.getAttribute('data-id');
+    document.getElementById('title').value = btn.getAttribute('data-title');
+    document.getElementById('description').value = btn.getAttribute('data-description');
+    document.getElementById('event_date').value = btn.getAttribute('data-date');
+    document.getElementById('location').value = btn.getAttribute('data-location');
     document.getElementById('submit-btn').innerText = 'Update Notice';
     document.getElementById('cancel-btn').style.display = 'block';
     window.scrollTo({ top: document.getElementById('notice-form-container').offsetTop - 100, behavior: 'smooth' });
@@ -190,7 +209,15 @@ function cancelEdit() {
 
             <?php if (isAdmin()): ?>
             <div style="margin-top: 1rem; display: flex; gap: 0.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
-                <button onclick="editNotice(this)" data-event="<?php echo htmlspecialchars(json_encode($event), ENT_QUOTES, 'UTF-8'); ?>" class="btn-primary" style="padding: 6px 15px; width: auto; font-size: 0.85rem;">Edit</button>
+                <button 
+                    onclick="editNotice(this)" 
+                    data-id="<?php echo $event['id']; ?>" 
+                    data-title="<?php echo htmlspecialchars($event['title'], ENT_QUOTES, 'UTF-8'); ?>"
+                    data-description="<?php echo htmlspecialchars($event['description'], ENT_QUOTES, 'UTF-8'); ?>"
+                    data-date="<?php echo $event['event_date']; ?>"
+                    data-location="<?php echo htmlspecialchars($event['location'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                    class="btn-primary" 
+                    style="padding: 6px 15px; width: auto; font-size: 0.85rem;">Edit</button>
                 <a href="?delete=<?php echo $event['id']; ?>" class="btn-danger" onclick="return confirm('Are you sure you want to delete this notice?')" style="padding: 6px 15px; font-size: 0.85rem; text-decoration: none; display: inline-block;">Delete</a>
             </div>
             <?php endif; ?>
