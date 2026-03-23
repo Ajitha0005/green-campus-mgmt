@@ -8,6 +8,8 @@ if (isLoggedIn()) {
 }
 
 $error = '';
+$success = $_SESSION['signup_success'] ?? '';
+unset($_SESSION['signup_success']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
@@ -63,7 +65,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <?php if ($error): ?>
-                <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
+                <div class="alert alert-error">
+                    <span class="material-symbols-outlined">error</span>
+                    <?php echo htmlspecialchars($error); ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($success): ?>
+                <div class="alert alert-success">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <?php echo htmlspecialchars($success); ?>
+                </div>
             <?php endif; ?>
 
             <form method="POST" action="">

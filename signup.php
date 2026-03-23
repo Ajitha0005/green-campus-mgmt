@@ -30,7 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
             if ($stmt->execute([$name, $email, $hashed_password, $role])) {
-                $success = 'Account created successfully! You can now login.';
+                $_SESSION['signup_success'] = 'Account created successfully! You can now login.';
+                header("Location: login.php");
+                exit;
             } else {
                 $error = 'Something went wrong. Please try again.';
             }
@@ -67,10 +69,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <?php if ($error): ?>
-                <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
+                <div class="alert alert-error">
+                    <span class="material-symbols-outlined">error</span>
+                    <?php echo htmlspecialchars($error); ?>
+                </div>
             <?php endif; ?>
             <?php if ($success): ?>
-                <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
+                <div class="alert alert-success">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <?php echo htmlspecialchars($success); ?>
+                </div>
             <?php endif; ?>
 
             <form method="POST" action="">
@@ -91,8 +99,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="form-group">
                     <label for="role">Joined As</label>
                     <div class="input-wrapper">
-                        <span class="material-symbols-outlined input-icon" style="left: 1.2rem; color: #999;">badge</span>
-                        <select id="role" name="role" class="form-control" required style="padding-left: 3.5rem;">
+                        <span class="material-symbols-outlined input-icon">badge</span>
+                        <select id="role" name="role" class="form-control select-control" required>
                             <option value="student">Student</option>
                             <option value="staff">Staff Member</option>
                         </select>
