@@ -54,9 +54,7 @@ try {
     $waterData = json_encode([]);
 }
 
-// Fetch Recent Feedback
-$feedbackListStmt = $pdo->query("SELECT f.*, u.name as user_name FROM feedback f JOIN users u ON f.user_id = u.id ORDER BY f.created_at DESC LIMIT 5");
-$recentFeedbacks = $feedbackListStmt->fetchAll();
+
 
 // Usage Alerts Logic
 $alerts = [];
@@ -187,54 +185,7 @@ if (isAdmin()) {
     </div>
 </div>
 
-<!-- Feedback Section -->
-    <div class="table-card" style="margin-top: 0; padding: 2.5rem;">
-        <div class="table-header">
-            <h3>Share Your Suggestions</h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">Help us make our campus greener and smarter</p>
-        </div>
-        <form action="feedback_handler.php" method="POST" id="feedback-form" style="margin-top: 1.5rem;">
-            <input type="hidden" name="feedback_id" id="feedback-id" value="0">
-            <input type="hidden" name="action" id="feedback-action" value="create">
-            <div class="form-group">
-                <textarea name="message" id="feedback-msg" class="form-control" placeholder="Your feedback or suggestions..." required style="height: 120px; padding: 1.2rem; border-radius: 18px; font-size: 1.1rem; border: 1.5px solid var(--border-color);"></textarea>
-            </div>
-            <div style="display: flex; gap: 1rem; align-items: center;">
-                <button type="submit" id="feedback-submit" class="btn-primary" style="width: auto; padding: 1rem 3rem;">Send Feedback</button>
-                <button type="button" id="cancel-edit" onclick="cancelEdit()" class="btn-secondary" style="display: none; width: auto; padding: 1rem 2rem; background: rgba(0,0,0,0.05); border: 1px solid var(--border-color);">Cancel</button>
-            </div>
-        </form>
 
-        <!-- Feedback Display -->
-        <div class="feedback-list" style="margin-top: 3rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
-            <h4 style="margin-bottom: 1.5rem; color: var(--dark-green);">Recent Feedback</h4>
-            <?php if (empty($recentFeedbacks)): ?>
-                <p style="color: var(--text-muted);">No feedback yet. Be the first to share!</p>
-            <?php else: ?>
-                <?php foreach ($recentFeedbacks as $fb): ?>
-                    <div class="feedback-item" style="background: rgba(16, 185, 129, 0.03); padding: 1.5rem; border-radius: 15px; margin-bottom: 1rem; border: 1px dashed var(--primary-green); position: relative;">
-                        <p style="color: var(--text-main); line-height: 1.6; font-size: 1.05rem;">"<?php echo htmlspecialchars($fb['message']); ?>"</p>
-                        <div style="margin-top: 0.8rem; display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-weight: 700; color: var(--primary-green); font-size: 0.9rem;">- <?php echo htmlspecialchars($fb['user_name']); ?></span>
-                            <div style="display: flex; align-items: center; gap: 1rem;">
-                                <span style="color: var(--text-muted); font-size: 0.8rem;"><?php echo date('d M Y, h:i A', strtotime($fb['created_at'])); ?></span>
-                                <?php if ($fb['user_id'] == $_SESSION['user_id'] || isAdmin()): ?>
-                                <div class="feedback-actions" style="display: flex; gap: 0.5rem;">
-                                    <button onclick='editFeedback(<?php echo $fb['id']; ?>, <?php echo json_encode($fb['message']); ?>)' style="background:none; border:none; color: var(--primary-green); cursor:pointer; padding: 2px;"><span class="material-symbols-outlined" style="font-size: 1.2rem;">edit</span></button>
-                                    <form action="feedback_handler.php" method="POST" style="display:inline;" onsubmit="return confirm('Delete this feedback?')">
-                                        <input type="hidden" name="id" value="<?php echo $fb['id']; ?>">
-                                        <input type="hidden" name="action" value="delete">
-                                        <button type="submit" style="background:none; border:none; color: #e74c3c; cursor:pointer; padding: 2px;"><span class="material-symbols-outlined" style="font-size: 1.2rem;">delete</span></button>
-                                    </form>
-                                </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
-    </div>
 </div>
 
 <!-- Chart.js Library -->
@@ -327,20 +278,7 @@ new Chart(ctxWaste, {
     }
 });
 
-function editFeedback(id, message) {
-    document.getElementById('feedback-id').value = id;
-    document.getElementById('feedback-msg').value = message;
-    document.getElementById('feedback-submit').innerText = 'Update Feedback';
-    document.getElementById('cancel-edit').style.display = 'block';
-    document.getElementById('feedback-msg').focus();
-}
 
-function cancelEdit() {
-    document.getElementById('feedback-id').value = '0';
-    document.getElementById('feedback-msg').value = '';
-    document.getElementById('feedback-submit').innerText = 'Send Feedback';
-    document.getElementById('cancel-edit').style.display = 'none';
-}
 </script>
 
 <?php require_once 'includes/footer.php'; ?>
